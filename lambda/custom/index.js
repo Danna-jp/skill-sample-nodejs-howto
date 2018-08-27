@@ -15,9 +15,9 @@ const LaunchRequestHandler = {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-    const item = requestAttributes.t(getRandomItem(Object.keys(recipes.RECIPE_EN_US)));
+    const Ryuusho = requestAttributes.t(getRandomRyuusho(Object.keys(recipes.RECIPE_ja_JP)));
 
-    const speakOutput = requestAttributes.t('WELCOME_MESSAGE', requestAttributes.t('SKILL_NAME'), item);
+    const speakOutput = requestAttributes.t('WELCOME_MESSAGE', requestAttributes.t('SKILL_NAME'), Ryuusho);
     const repromptOutput = requestAttributes.t('WELCOME_REPROMPT');
 
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
@@ -38,15 +38,15 @@ const RecipeHandler = {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-    const itemSlot = handlerInput.requestEnvelope.request.intent.slots.Item;
-    let itemName;
-    if (itemSlot && itemSlot.value) {
-      itemName = itemSlot.value.toLowerCase();
+    const RyuushoSlot = handlerInput.requestEnvelope.request.intent.slots.Ryuusho;
+    let RyuushoName;
+    if (RyuushoSlot && RyuushoSlot.value) {
+      RyuushoName = RyuushoSlot.value.toLowerCase();
     }
 
-    const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), itemName);
+    const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), RyuushoName);
     const myRecipes = requestAttributes.t('RECIPES');
-    const recipe = myRecipes[itemName];
+    const recipe = myRecipes[RyuushoName];
     let speakOutput = "";
 
     if (recipe) {
@@ -62,10 +62,10 @@ const RecipeHandler = {
     else{
       speakOutput = requestAttributes.t('RECIPE_NOT_FOUND_MESSAGE');
       const repromptSpeech = requestAttributes.t('RECIPE_NOT_FOUND_REPROMPT');
-      if (itemName) {
-        speakOutput += requestAttributes.t('RECIPE_NOT_FOUND_WITH_ITEM_NAME', itemName);
+      if (RyuushoName) {
+        speakOutput += requestAttributes.t('RECIPE_NOT_FOUND_WITH_Ryuusho_NAME', RyuushoName);
       } else {
-        speakOutput += requestAttributes.t('RECIPE_NOT_FOUND_WITHOUT_ITEM_NAME');
+        speakOutput += requestAttributes.t('RECIPE_NOT_FOUND_WITHOUT_Ryuusho_NAME');
       }
       speakOutput += repromptSpeech;
 
@@ -91,10 +91,10 @@ const HelpHandler = {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-    const item = requestAttributes.t(getRandomItem(Object.keys(recipes.RECIPE_EN_US)));
+    const Ryuusho = requestAttributes.t(getRandomRyuusho(Object.keys(recipes.RECIPE_ja_JP)));
 
-    sessionAttributes.speakOutput = requestAttributes.t('HELP_MESSAGE', item);
-    sessionAttributes.repromptSpeech = requestAttributes.t('HELP_REPROMPT', item);
+    sessionAttributes.speakOutput = requestAttributes.t('HELP_MESSAGE', Ryuusho);
+    sessionAttributes.repromptSpeech = requestAttributes.t('HELP_REPROMPT', Ryuusho);
 
     return handlerInput.responseBuilder
       .speak(sessionAttributes.speakOutput)
@@ -154,8 +154,8 @@ const ErrorHandler = {
     console.log(`Error handled: ${error.message}`);
 
     return handlerInput.responseBuilder
-      .speak('Sorry, I can\'t understand the command. Please say again.')
-      .reprompt('Sorry, I can\'t understand the command. Please say again.')
+      .speak('聞き取れませんでした、もう一度お願いします。Sorry, I can\'t understand the command. Please say again.')
+      .reprompt('すみません、質問がよく理解できません。もう一度お願いします。Sorry, I can\'t understand the command. Please say again.')
       .getResponse();
   },
 };
@@ -163,52 +163,40 @@ const ErrorHandler = {
 /* CONSTANTS */
 const skillBuilder = Alexa.SkillBuilders.custom();
 const languageStrings = {
-  en: {
+  ja: {
     translation: {
-      RECIPES: recipes.RECIPE_EN_US,
-      SKILL_NAME: 'Minecraft Helper',
-      WELCOME_MESSAGE: 'Welcome to %s. You can ask a question like, what\'s the recipe for a %s? ... Now, what can I help you with?',
-      WELCOME_REPROMPT: 'For instructions on what you can say, please say help me.',
+      RECIPES: recipes.RECIPE_ja_JP,
+      SKILL_NAME: '流山高校商業科',
+      WELCOME_MESSAGE: '流山高校のことを何でも答えます。どうぞ聞いてみてください。',
+      WELCOME_REPROMPT: '例えば、「行事予定を教えて」や「簿記検定はいつ」などと聞いてみてください。',
       DISPLAY_CARD_TITLE: '%s  - Recipe for %s.',
-      HELP_MESSAGE: 'You can ask questions such as, what\'s the recipe for a %s, or, you can say exit...Now, what can I help you with?',
-      HELP_REPROMPT: 'You can say things like, what\'s the recipe for a %s, or you can say exit...Now, what can I help you with?',
+      HELP_MESSAGE: '例えば、「時間割を教えて」や「簿記検定はいつ」などと聞いてみてください。',
+      HELP_REPROMPT: '例えば、「時間割を教えて」や「簿記検定はいつ」などと聞いてみてください。',
       STOP_MESSAGE: 'Goodbye!',
-      RECIPE_REPEAT_MESSAGE: 'Try saying repeat.',
-      RECIPE_NOT_FOUND_MESSAGE: 'I\'m sorry, I currently do not know ',
-      RECIPE_NOT_FOUND_WITH_ITEM_NAME: 'the recipe for %s. ',
-      RECIPE_NOT_FOUND_WITHOUT_ITEM_NAME: 'that recipe. ',
-      RECIPE_NOT_FOUND_REPROMPT: 'What else can I help with?'
+      RECIPE_REPEAT_MESSAGE: 'もう一度お願いします。.',
+      RECIPE_NOT_FOUND_MESSAGE: '今はまだわかりません',
+      RECIPE_NOT_FOUND_WITH_Ryuusho_NAME: 'the recipe for %s. ',
+      RECIPE_NOT_FOUND_WITHOUT_Ryuusho_NAME: 'that recipe. ',
+      RECIPE_NOT_FOUND_REPROMPT: '何かほかに聞きたいことはありませんか。'
     },
   },
   'en-US': {
     translation: {
-      RECIPES: recipes.RECIPE_EN_US,
-      SKILL_NAME: 'American Minecraft Helper'
+        RECIPES: recipes.RECIPE_EN_US,
+        SKILL_NAME: 'Ngareyama Highschool of Business',
+        WELCOME_MESSAGE: 'Welcome to Nagareyama. You can ask a question like, what\'s the events schedule ? ... Now, what can I help you with?',
+        WELCOME_REPROMPT: 'For instructions on what you can say, please say help me.',
+        DISPLAY_CARD_TITLE: '%s  - Recipe for %s.',
+        HELP_MESSAGE: 'You can ask questions such as, what\'s the next exam, or, you can say exit...Now, what can I help you with?',
+        HELP_REPROMPT: 'You can say things like, what\'s the events schedule, or you can say exit...Now, what can I help you with?',
+        STOP_MESSAGE: 'Goodbye!',
+        RECIPE_REPEAT_MESSAGE: 'Try saying repeat.',
+        RECIPE_NOT_FOUND_MESSAGE: 'I\'m sorry, I currently do not know ',
+        RECIPE_NOT_FOUND_WITH_Ryuusho_NAME: 'the recipe for %s. ',
+        RECIPE_NOT_FOUND_WITHOUT_Ryuusho_NAME: 'that recipe. ',
+        RECIPE_NOT_FOUND_REPROMPT: 'What else can I help with?'
     },
-  },
-  'en-GB': {
-    translation: {
-      RECIPES: recipes.RECIPE_EN_GB,
-      SKILL_NAME: 'British Minecraft Helper'
-    },
-  },
-  de: {
-    translation: {
-      RECIPES: recipes.RECIPE_DE_DE,
-      SKILL_NAME: 'Assistent für Minecraft in Deutsch',
-      WELCOME_MESSAGE: 'Willkommen bei %s. Du kannst beispielsweise die Frage stellen: Welche Rezepte gibt es für eine %s? ... Nun, womit kann ich dir helfen?',
-      WELCOME_REPROMPT: 'Wenn du wissen möchtest, was du sagen kannst, sag einfach „Hilf mir“.',
-      DISPLAY_CARD_TITLE: '%s - Rezept für %s.',
-      HELP_MESSAGE: 'Du kannst beispielsweise Fragen stellen wie „Wie geht das Rezept für eine %s“ oder du kannst „Beenden“ sagen ... Wie kann ich dir helfen?',
-      HELP_REPROMPT: 'Du kannst beispielsweise Sachen sagen wie „Wie geht das Rezept für eine %s“ oder du kannst „Beenden“ sagen ... Wie kann ich dir helfen?',
-      STOP_MESSAGE: 'Auf Wiedersehen!',
-      RECIPE_REPEAT_MESSAGE: 'Sage einfach „Wiederholen“.',
-      RECIPE_NOT_FOUND_MESSAGE: 'Tut mir leid, ich kenne derzeit ',
-      RECIPE_NOT_FOUND_WITH_ITEM_NAME: 'das Rezept für %s nicht. ',
-      RECIPE_NOT_FOUND_WITHOUT_ITEM_NAME: 'dieses Rezept nicht. ',
-      RECIPE_NOT_FOUND_REPROMPT: 'Womit kann ich dir sonst helfen?'
-    },
-  },
+  }, 
 };
 
 // Finding the locale of the user
@@ -228,12 +216,12 @@ const LocalizationInterceptor = {
   },
 };
 
-// getRandomItem
-function getRandomItem(arrayOfItems) {
+// getRandomRyuusho
+function getRandomRyuusho(arrayOfRyuushos) {
   // the argument is an array [] of words or phrases
   let i = 0;
-  i = Math.floor(Math.random() * arrayOfItems.length);
-  return (arrayOfItems[i]);
+  i = Math.floor(Math.random() * arrayOfRyuushos.length);
+  return (arrayOfRyuushos[i]);
 };
 
 /* LAMBDA SETUP */
