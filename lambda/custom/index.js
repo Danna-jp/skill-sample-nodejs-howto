@@ -1,34 +1,40 @@
 /* eslint-disable  func-names */
 /* eslint-disable  no-console */
 
+//SDKを使いますよ
 const Alexa = require('ask-sdk-core');
+//recipesという外部ファイルを参照しますよ
 const recipes = require('./recipes');
+//多言語対応
 const i18n = require('i18next');
 const sprintf = require('i18next-sprintf-postprocessor');
 
-/* INTENT HANDLERS */
+/* INTENTを処理するHANDLERSを最下部の宣言どおりに並べて記述 */
 const LaunchRequestHandler = {
+  //canHandleでこのハンドラーを使うかどうかを判別して、使うならhandleメソッドにtrueを返す
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
+  //handleで実際のハンドラーの処理を記述していく
   handle(handlerInput) {
+    //Atrributesを使ってセッションの間記録することを宣言
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-
+    //外部のRecipes.jsというランダムに配列している外部モジュールを定義
     const Ryuusho = requestAttributes.t(getRandomRyuusho(Object.keys(recipes.RECIPE_ja_JP)));
-
+    //speakOutput＝アレクサのウェルカムメッセージとrepromptOutput＝質問をするを定義
     const speakOutput = requestAttributes.t('WELCOME_MESSAGE', requestAttributes.t('SKILL_NAME'), Ryuusho);
     const repromptOutput = requestAttributes.t('WELCOME_REPROMPT');
-
+    //スキルのセッションンの進み具合を記録しておく
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-
+    //LaunchRequestの実際の応答を定義
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(repromptOutput)
       .getResponse();
   },
 };
-
+//流商のことを聞かれて応答するハンドラー
 const RecipeHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -38,7 +44,9 @@ const RecipeHandler = {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
+    //RyuushoSlotをRyuushoNameとして定義
     const RyuushoSlot = handlerInput.requestEnvelope.request.intent.slots.Ryuusho;
+    //RyuushoNameで応答の内容を選択
     let RyuushoName;
     if (RyuushoSlot && RyuushoSlot.value) {
       RyuushoName = RyuushoSlot.value.toLowerCase();
@@ -49,7 +57,18 @@ const RecipeHandler = {
     const recipe = myRecipes[RyuushoName];
     let speakOutput = "";
 
-    if (recipe) {
+    if(RyuushoName == '体験入学') {
+    sessionAttributes.speakOutput = recipe;
+    //sessionAttributes.repromptSpeech = requestAttributes.t('RECIPE_REPEAT_MESSAGE');
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    const largeImageUrl = 'https://s3-ap-northeast-1.amazonaws.com/ryuusyo/taiken(1).jpg';
+    const smallImageUrl = 'https://s3-ap-northeast-1.amazonaws.com/ryuusyo/taiken(2).jpg';
+    return handlerInput.responseBuilder
+      .speak(sessionAttributes.speakOutput) // .reprompt(sessionAttributes.repromptSpeech)
+      .withStandardCard('体験入学ポスター', 'まだの方はぜひご参加ください！', smallImageUrl, largeImageUrl)
+      .getResponse();
+  }
+    else if (recipe) {
       sessionAttributes.speakOutput = recipe;
       //sessionAttributes.repromptSpeech = requestAttributes.t('RECIPE_REPEAT_MESSAGE');
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
@@ -224,7 +243,7 @@ function getRandomRyuusho(arrayOfRyuushos) {
   return (arrayOfRyuushos[i]);
 };
 
-/* LAMBDA SETUP */
+/* LAMBDA SETUP　上から順にどのハンドラーを使うか確かめていく */
 exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
